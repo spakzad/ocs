@@ -17,7 +17,7 @@ public final class Flamingos2 extends Instrument {
     public static final String INSTR_DIR = "flamingos2";
     public static final String INSTR_PREFIX = "";
     public static final String INSTR_PREFIX_2 = "flamingos2_";
-    private static final double WELL_DEPTH = 200000.0;
+    private static final double WELL_DEPTH = 155400.0;
     public static String getPrefix() {
         return INSTR_PREFIX;
     }

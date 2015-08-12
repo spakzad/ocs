@@ -204,7 +204,8 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
     private List<ItcWarning> warningsForImaging(final Flamingos2 instrument, final double peakPixelCount) {
         final double wellLimit = 0.8 * instrument.getWellDepth();
         return new ArrayList<ItcWarning>() {{
-            if (peakPixelCount > wellLimit) add(new ItcWarning("Warning: peak pixel exceeds 80% of the well depth and may be saturated"));
+            if      (peakPixelCount > wellLimit) add(new ItcWarning("Warning: peak pixel exceeds 80% of the well depth and may be saturated"));
+            else if (peakPixelCount > 80000)     add(new ItcWarning(String.format("Warning: peak pixel is %.0f %% of the linearity limit of 98,000 e- (linearity is better than 0.5%% below 98,000 e-).", peakPixelCount/980)));
         }};
     }
 
