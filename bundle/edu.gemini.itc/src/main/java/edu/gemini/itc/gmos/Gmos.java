@@ -134,8 +134,7 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
             }
         }
 
-
-        addComponent(_detector);
+        addComponent(_detector);  // TODO: REL-2577:  Move line to AFTER any IFU wavelength shifts.
 
 
         // validate the current configuration
@@ -286,10 +285,6 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
 
                 if (gp.customSlitWidth().get().equals(GmosCommonType.CustomSlitWidth.OTHER))
                     throw new RuntimeException("Slit width for the custom mask is not known.");
-            }
-
-            if (isIfu2() && gp.ccdType() == GmosCommonType.DetectorManufacturer.HAMAMATSU) {
-                throw new RuntimeException("Currently IFU-2 is not supported for Hamamatsu CCD.");
             }
 
         }

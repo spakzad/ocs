@@ -128,6 +128,7 @@ public final class FilesServlet extends HttpServlet {
             case "SignalChart":       chart = ITCChart.forSpcDataSet(results.chart(SignalChart.instance(),      index), pd); break;
             case "S2NChart":          chart = ITCChart.forSpcDataSet(results.chart(S2NChart.instance(),         index), pd); break;
             case "SignalPixelChart":  chart = ITCChart.forSpcDataSet(results.chart(SignalPixelChart.instance(), index), pd); break;
+            case "S2NPixelChart":     chart = ITCChart.forSpcDataSet(results.chart(S2NPixelChart.instance(),    index), pd); break;
             default:            throw new Error();
         }
         return chart.getBufferedImage(800, 600);
@@ -144,6 +145,8 @@ public final class FilesServlet extends HttpServlet {
             case "FinalS2NData":   file = toFile(result.chart(S2NChart.instance(),    chartIndex).allSeriesAsJava(FinalS2NData.instance()),   seriesIndex); break;
             case "PixSigData":     file = toFile(result.chart(SignalPixelChart.instance(),    chartIndex).allSeriesAsJava(SignalData.instance()),  seriesIndex); break;
             case "PixBackData":    file = toFile(result.chart(SignalPixelChart.instance(),    chartIndex).allSeriesAsJava(BackgroundData.instance()),   seriesIndex); break;
+            case "PixSingleS2NData":  file = toFile(result.chart(S2NPixelChart.instance(), chartIndex).allSeriesAsJava(SingleS2NData.instance()),  seriesIndex); break;
+            case "PixFinalS2NData":   file = toFile(result.chart(S2NPixelChart.instance(), chartIndex).allSeriesAsJava(FinalS2NData.instance()),   seriesIndex); break;
             default:               throw new Error();
         }
         return "# ITC Data: " + Calendar.getInstance().getTime() + "\n \n" + file;

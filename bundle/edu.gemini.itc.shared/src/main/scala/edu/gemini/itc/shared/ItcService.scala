@@ -70,6 +70,7 @@ sealed trait SpcChartType
 case object SignalChart       extends SpcChartType { val instance = this } // signal and background over wavelength [nm]
 case object S2NChart          extends SpcChartType { val instance = this } // single and final S2N over wavelength [nm]
 case object SignalPixelChart  extends SpcChartType { val instance = this } // single and final S2N over wavelength [nm]
+case object S2NPixelChart     extends SpcChartType { val instance = this } // single and final S2N over pixels
 
 // There are four different data sets
 sealed trait SpcDataType
@@ -79,6 +80,8 @@ case object SingleS2NData     extends SpcDataType { val instance = this }  // si
 case object FinalS2NData      extends SpcDataType { val instance = this }  // final S2N over wavelength [nm]
 case object PixSigData        extends SpcDataType { val instance = this }  // signal over pixels
 case object PixBackData       extends SpcDataType { val instance = this }  // background over pixels
+case object PixSingleS2NData  extends SpcDataType { val instance = this }  // single S2N over pixels
+case object PixFinalS2NData   extends SpcDataType { val instance = this }  // final S2N over pixels
 
 /** Series of (x,y) data points used to create charts and text data files. */
 final case class SpcSeriesData(dataType: SpcDataType, title: String, data: Array[Array[Double]], color: Option[Color] = None) {

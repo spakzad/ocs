@@ -78,24 +78,40 @@ public final class GmosPrinter extends PrinterBase {
         // Print links for all data files and the charts for each IFU.
         // For the non IFU case specS2N will have only one entry.
         for (int i = 0; i < result.specS2N().length; i++) {
-            _println("<p style=\"page-break-inside: never\">");
-            _printFileLinkAllSeries(id, SignalData.instance(),     i);
-            _printFileLinkAllSeries(id, BackgroundData.instance(), i);
-            _printFileLinkAllSeries(id, SingleS2NData.instance(),  i);
-            _printFileLinkAllSeries(id, FinalS2NData.instance(),  i);
-            if (mainInstrument.isIfu2()) {
+            if(mainInstrument.isIfu2() && ccdArray.length > 1) {
+                _println("<p style=\"page-break-inside: never\">");
                 _printFileLink(id, PixSigData.instance(), i, 0, " (red)");
                 _printFileLink(id, PixSigData.instance(), i, 1, " (blue)");
                 _printFileLink(id, PixBackData.instance(), i, 0, " (red)");
                 _printFileLink(id, PixBackData.instance(), i, 1, " (blue)");
-            }
-            _printImageLink(id, SignalChart.instance(), i, pdp);
-            _println("");
-            _printImageLink(id, S2NChart.instance(),    i, pdp);
-            _println("");
-            if (mainInstrument.isIfu2()) {
+                _println("");
                 _printImageLink(id, SignalPixelChart.instance(), i, pdp);
                 _println("");
+                _printImageLink(id, S2NPixelChart.instance(), i, pdp);
+                _println("");
+            } else {
+                _println("<p style=\"page-break-inside: never\">");
+                _printFileLinkAllSeries(id, SignalData.instance(), i);
+                _printFileLinkAllSeries(id, BackgroundData.instance(), i);
+                _printFileLinkAllSeries(id, SingleS2NData.instance(), i);
+                _printFileLinkAllSeries(id, FinalS2NData.instance(), i);
+                if (mainInstrument.isIfu2()) {
+                    _printFileLink(id, PixSigData.instance(), i, 0, " (red)");
+                    _printFileLink(id, PixSigData.instance(), i, 1, " (blue)");
+                    _printFileLink(id, PixBackData.instance(), i, 0, " (red)");
+                    _printFileLink(id, PixBackData.instance(), i, 1, " (blue)");
+                }
+///                _println("");
+                _printImageLink(id, SignalChart.instance(), i, pdp);
+                _println("");
+                _printImageLink(id, S2NChart.instance(), i, pdp);
+                _println("");
+                if (mainInstrument.isIfu2()) {
+                    _printImageLink(id, SignalPixelChart.instance(), i, pdp);
+                    _println("");
+///                    _printImageLink(id, S2NPixelChart.instance(), i, pdp);
+///                    _println("");
+                }
             }
         }
 
