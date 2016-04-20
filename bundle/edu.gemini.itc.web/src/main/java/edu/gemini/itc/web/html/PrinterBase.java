@@ -196,6 +196,7 @@ public abstract class PrinterBase {
         if      (type == SignalChart.instance())        return "Signal/Background Chart";
         else if (type == S2NChart.instance())           return "Signal to Noise Chart";
         else if (type == SignalPixelChart.instance())   return "Signal/Background Pixel Chart";
+        else if (type == S2NPixelChart.instance())      return "Signal to Noise Pixel Chart";
         else    throw new Error();
     }
 
@@ -206,6 +207,8 @@ public abstract class PrinterBase {
         else if (type == FinalS2NData.instance())       return "Final S/N ASCII data";
         else if (type == PixSigData.instance())         return "Pixel ASCII signal spectrum";
         else if (type == PixBackData.instance())        return "Pixel ASCII SQRT(background) spectrum";
+        else if (type == PixSingleS2NData.instance())   return "Pixel Single Exposure S/N ASCII data";
+        else if (type == PixFinalS2NData.instance())    return "Pixel Final S/N ASCII data";
         else    throw new Error();
     }
 

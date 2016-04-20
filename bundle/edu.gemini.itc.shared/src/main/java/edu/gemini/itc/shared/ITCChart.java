@@ -2,6 +2,7 @@ package edu.gemini.itc.shared;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.AxisLocation;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PlotOrientation;
@@ -98,6 +99,10 @@ public final class ITCChart {
             plot.mapDatasetToDomainAxis(0, 0);
         }
 
+        double ifu2XBlocation = 0;
+        double ifu2XRlocation = 0;
+        double ifu2Ylocation  = 1.0;
+
         // scale xAxis - domain axis
         if (plotParams.getPlotLimits().equals(PlottingDetails.PlotLimits.USER)) {
             setDomainMinMax(plotParams.getPlotWaveL(), plotParams.getPlotWaveU());
@@ -122,6 +127,17 @@ public final class ITCChart {
             }
             plot.setDomainAxis(i + 1, axis);
             plot.setDomainAxisLocation(i + 1, AxisLocation.TOP_OR_LEFT);
+
+            ifu2XBlocation = (s.xAxis().range().get().end() - s.xAxis().range().get().start()) * (1.0/4.0);
+            ifu2XRlocation = (s.xAxis().range().get().end() - s.xAxis().range().get().start()) * (3.0/4.0);
+            ifu2Ylocation  = chart.getXYPlot().getRangeAxis().getRange().getLength(); //  .getUpperBound() ; //plot.getRangeCrosshairValue();  //axis.get e().getCentralValue(); chart.getXYPlot().getRangeAxis().getUpperBound(); //(s.yAxis().range().get().end() - s.yAxis().range().get().start()) * (9.0/10.0);
+
+            final XYTextAnnotation annotation1 = new XYTextAnnotation("IFU-B", ifu2XBlocation, ifu2Ylocation);       // TODO: Generalize the y value
+            annotation1.setFont(new Font("SansSerif", Font.PLAIN, 10));
+            plot.addAnnotation(annotation1);
+            final XYTextAnnotation annotation2 = new XYTextAnnotation("IFU-R", ifu2XRlocation, ifu2Ylocation);        // TODO: Generalize the y value
+            annotation2.setFont(new Font("SansSerif", Font.PLAIN, 10));
+            plot.addAnnotation(annotation2);
         }
 
         // add all the data

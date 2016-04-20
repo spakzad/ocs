@@ -39,6 +39,7 @@ import edu.gemini.itc.shared.S2NChart;
 import edu.gemini.itc.shared.SignalChart;
 import edu.gemini.itc.shared.SignalData;
 import edu.gemini.itc.shared.SignalPixelChart;
+import edu.gemini.itc.shared.S2NPixelChart;
 import edu.gemini.itc.shared.SingleS2NData;
 import edu.gemini.itc.shared.SourceDefinition;
 import edu.gemini.itc.shared.SpcChartData;
@@ -97,6 +98,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             // IFU-2 case has an additional chart with signal in pixel space
             if (((Gmos) r[0].instrument()).isIfu2()) {
                 charts.add(createSignalPixelChart(r, i));
+                charts.add(createS2NPixelChart(r, i));
             }
             groups.add(charts);
         }
@@ -373,6 +375,39 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         return new SpcChartData(SignalPixelChart.instance(), title, xAxis, yAxis, scalaData, scalaAxes);
     }
 
+    /** Creates the signal to noise in pixel space chart. */
+    private SpcChartData createS2NPixelChart(final SpectroscopyResult[] results, final int i) {
+        final Gmos mainInstrument = (Gmos) results[0].instrument(); // This must be GMOS here.
+        final Gmos[] ccdArray     = mainInstrument.getDetectorCcdInstruments();
+        final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
+
+        final boolean ifuUsed   = mainInstrument.isIfuUsed();
+        final double  ifuOffset = ifuUsed ? mainInstrument.getIFU().getApertureOffsetList().get(i) : 0.0;
+
+        final List<ChartAxis> axes = new ArrayList<>();
+        final String title    = "Pixel S/N ASCII data" + (ifuUsed ? "\nIFU element offset: " + String.format("%.2f", ifuOffset) + " arcsec" : "");
+        final ChartAxis xAxis = new ChartAxis("Pixels", true, new Some<>(new ChartAxisRange(0, tv.fullArrayPix())));
+        final ChartAxis yAxis = ChartAxis.apply("e- per exposure per spectral pixel");
+
+        axes.add(new ChartAxis("Wavelength (nm) (IFU-R)",  false, new Some<>(new ChartAxisRange(tv.ifu2RedStart(),  tv.ifu2RedEnd()))));
+        axes.add(new ChartAxis("Wavelength (nm) (IFU-B)", false, new Some<>(new ChartAxisRange(tv.ifu2BlueStart(), tv.ifu2BlueEnd()))));
+
+        final List<SpcSeriesData> data = new ArrayList<>();
+
+        for (final Gmos instrument : ccdArray) {
+            final String ccdName = results.length > 1 ? " " + instrument.getDetectorCcdName() : "";
+            final int ccdIndex   = instrument.getDetectorCcdIndex();
+            final int first      = tv.getDetectorCcdStartIndex(ccdIndex);
+            final int last       = tv.getDetectorCcdEndIndex(ccdIndex, ccdArray.length);
+            final SpectroscopyResult result = results[ccdIndex];
+            data.addAll(s2nPixelChartSeries(result.specS2N()[i], first, last, tv, ccdName));
+        }
+
+        final scala.collection.immutable.List<SpcSeriesData> scalaData = JavaConversions.asScalaBuffer(data).toList();
+        final scala.collection.immutable.List<ChartAxis>     scalaAxes = JavaConversions.asScalaBuffer(axes).toList();
+        return new SpcChartData(S2NPixelChart.instance(), title, xAxis, yAxis, scalaData, scalaAxes);
+    }
+
     /** Creates all data series for the signal in wavelength space chart. */
     private static List<SpcSeriesData> sigChartSeries(final Gmos mainInstrument, final int ccdIndex, final SpecS2N result, final int start, final int end, final DetectorsTransmissionVisitor tv, final String ccdName) {
         final String sigTitle = "Signal" + ccdName;
@@ -460,6 +495,34 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         series.add(new SpcSeriesData(SignalData.instance(),     "Blue Signal"           + ccdName, shiftedBlue,    new Some<>(ITCChart.DarkBlue)));
         series.add(new SpcSeriesData(BackgroundData.instance(), "SQRT(Red Background)"  + ccdName, shiftedRedBkg,  new Some<>(ITCChart.LightRed)));
         series.add(new SpcSeriesData(BackgroundData.instance(), "SQRT(Blue Background)" + ccdName, shiftedBlueBkg, new Some<>(ITCChart.LightBlue)));
+
+        return series;
+    }
+
+    /** Creates all data series for the signal to noise in pixel space chart. */
+    private List<SpcSeriesData> s2nPixelChartSeries(final SpecS2N result, final int start, final int end, final DetectorsTransmissionVisitor tv, final String ccdName) {
+        // This type of chart is currently only used for IFU-2. It transforms the signal from
+        // wavelength space to pixel space and displays it as a chart including gaps between CCDs.
+
+        // those values are still original, no gaps added, do transformation to pixel space first
+        final VisitableSampledSpectrum redExpS2N = ((VisitableSampledSpectrum) result.getExpS2NSpectrum().clone());
+        final VisitableSampledSpectrum bluExpS2N = ((VisitableSampledSpectrum) result.getExpS2NSpectrum().clone());
+
+        final VisitableSampledSpectrum redFinalS2N = ((VisitableSampledSpectrum) result.getFinalS2NSpectrum().clone());
+        final VisitableSampledSpectrum bluFinalS2N = ((VisitableSampledSpectrum) result.getFinalS2NSpectrum().clone());
+
+        // to pixel transform also adds gaps (i.e. sets values to zero..)
+        final double shift = tv.ifu2shift();
+        final double shiftedRedExpS2N[][]  = tv.toPixelSpace(redExpS2N.getData(start, end),    shift);
+        final double shiftedBlueExpS2N[][] = tv.toPixelSpace(bluExpS2N.getData(start, end),   -shift);
+        final double shiftedRedFinS2N[][]  = tv.toPixelSpace(redFinalS2N.getData(start, end),  shift);
+        final double shiftedBlueFinS2N[][] = tv.toPixelSpace(bluFinalS2N.getData(start, end), -shift);
+
+        final List<SpcSeriesData> series = new ArrayList<>();
+        series.add(new SpcSeriesData(SignalData.instance(),     "Single Exp S/N (IFU-R)" + ccdName, shiftedRedExpS2N,  new Some<>(ITCChart.DarkRed)));
+        series.add(new SpcSeriesData(SignalData.instance(),     "Single Exp S/N (IFU-B)" + ccdName, shiftedBlueExpS2N, new Some<>(ITCChart.DarkBlue)));
+        series.add(new SpcSeriesData(BackgroundData.instance(), "SQRT(IFU-R Background)" + ccdName, shiftedRedFinS2N,  new Some<>(ITCChart.LightRed)));
+        series.add(new SpcSeriesData(BackgroundData.instance(), "SQRT(IFU-B Background)" + ccdName, shiftedBlueFinS2N, new Some<>(ITCChart.LightBlue)));
 
         return series;
     }
