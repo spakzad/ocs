@@ -490,6 +490,8 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final double shiftedRedBkg[][]  = tv.toPixelSpace(redBkg.getData(start, end),  shift);
         final double shiftedBlueBkg[][] = tv.toPixelSpace(bluBkg.getData(start, end), -shift);
 
+//        DetectorQE.DetectorQEAdd();
+
         final List<SpcSeriesData> series = new ArrayList<>();
         series.add(new SpcSeriesData(SignalData.instance(),     "Red Signal"            + ccdName, shiftedRed,     new Some<>(ITCChart.DarkRed)));
         series.add(new SpcSeriesData(SignalData.instance(),     "Blue Signal"           + ccdName, shiftedBlue,    new Some<>(ITCChart.DarkBlue)));
@@ -518,6 +520,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final double shiftedRedFinS2N[][]  = tv.toPixelSpace(redFinalS2N.getData(start, end),  shift);
         final double shiftedBlueFinS2N[][] = tv.toPixelSpace(bluFinalS2N.getData(start, end), -shift);
 
+//        DetectorQE.DetectorQEAdd();
         final List<SpcSeriesData> series = new ArrayList<>();
         series.add(new SpcSeriesData(SignalData.instance(),     "Single Exp S/N (IFU-R)" + ccdName, shiftedRedExpS2N,  new Some<>(ITCChart.DarkRed)));
         series.add(new SpcSeriesData(SignalData.instance(),     "Single Exp S/N (IFU-B)" + ccdName, shiftedBlueExpS2N, new Some<>(ITCChart.DarkBlue)));
