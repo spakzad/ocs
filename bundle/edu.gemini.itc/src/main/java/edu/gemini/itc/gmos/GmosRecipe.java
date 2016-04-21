@@ -521,6 +521,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final double shiftedBlueFinS2N[][] = tv.toPixelSpace(bluFinalS2N.getData(start, end), -shift);
 
 //        DetectorQE.DetectorQEAdd();
+
         final List<SpcSeriesData> series = new ArrayList<>();
         series.add(new SpcSeriesData(SignalData.instance(),     "Single Exp S/N (IFU-R)" + ccdName, shiftedRedExpS2N,  new Some<>(ITCChart.DarkRed)));
         series.add(new SpcSeriesData(SignalData.instance(),     "Single Exp S/N (IFU-B)" + ccdName, shiftedBlueExpS2N, new Some<>(ITCChart.DarkBlue)));
