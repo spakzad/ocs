@@ -12,6 +12,7 @@ import scala.Option;
 
 /**
  * Created by spakzad on 4/6/16.
+ * Edited on 4/20/16.
  */
 public abstract class DetectorQE extends Instrument  implements BinningProvider, SpectroscopyInstrument {
 
