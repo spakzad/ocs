@@ -5,12 +5,13 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.AxisLocation;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.plot.*;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.ui.RectangleAnchor;
 import org.jfree.ui.RectangleEdge;
+import org.jfree.ui.TextAnchor;
 import scala.Option;
 import scala.collection.JavaConversions;
 
@@ -128,9 +129,19 @@ public final class ITCChart {
             plot.setDomainAxis(i + 1, axis);
             plot.setDomainAxisLocation(i + 1, AxisLocation.TOP_OR_LEFT);
 
-            ifu2XBlocation = (s.xAxis().range().get().end() - s.xAxis().range().get().start()) * (1.0/4.0);
-            ifu2XRlocation = (s.xAxis().range().get().end() - s.xAxis().range().get().start()) * (3.0/4.0);
-            ifu2Ylocation  = chart.getXYPlot().getRangeAxis().getRange().getLength(); //  .getUpperBound() ; //plot.getRangeCrosshairValue();  //axis.get e().getCentralValue(); chart.getXYPlot().getRangeAxis().getUpperBound(); //(s.yAxis().range().get().end() - s.yAxis().range().get().start()) * (9.0/10.0);
+            ifu2XRlocation = (s.xAxis().range().get().end() - s.xAxis().range().get().start()) * (1.0/4.0);
+            ifu2XBlocation = (s.xAxis().range().get().end() - s.xAxis().range().get().start()) * (3.0/4.0);
+
+            //ifu2Ylocation = this.seriesData.getSeries().size();
+            //ifu2Ylocation = seriesData.getDomainUpperBound();
+            //ifu2Ylocation = plotParams.getPlotLimits().equals()
+            ifu2Ylocation  = chart.getXYPlot().getRangeAxis().getRange().getLength();                          /// = 1.05
+            //ifu2Ylocation  = s.yAxis().range().get().end();                                                    /// = Didn't work
+            //ifu2Ylocation  = s.yAxis().range().get().start();                                                  /// = Didn't work
+            //ifu2Ylocation  = chart.getXYPlot().getRangeAxis().getRange().getCentralValue();                    /// = 0.525
+            //ifu2Ylocation  = chart.getXYPlot().getRangeAxis().getRange().getUpperBound();                      /// = 1.05
+            //ifu2Ylocation  = plot.getRangeCrosshairValue();                                                    /// =  0.0
+            //ifu2Ylocation  = (s.yAxis().range().get().end() - s.yAxis().range().get().start()) * (9.0/10.0);   /// = Didn't work
 
             final XYTextAnnotation annotation1 = new XYTextAnnotation("IFU-B", ifu2XBlocation, ifu2Ylocation);       // TODO: Generalize the y value
             annotation1.setFont(new Font("SansSerif", Font.PLAIN, 10));
@@ -138,6 +149,20 @@ public final class ITCChart {
             final XYTextAnnotation annotation2 = new XYTextAnnotation("IFU-R", ifu2XRlocation, ifu2Ylocation);        // TODO: Generalize the y value
             annotation2.setFont(new Font("SansSerif", Font.PLAIN, 10));
             plot.addAnnotation(annotation2);
+
+            final Marker IFUB = new ValueMarker(200.0);
+            IFUB.setPaint(Color.blue);
+            IFUB.setLabel("IFU-B");
+            IFUB.setLabelAnchor(RectangleAnchor.BOTTOM_RIGHT);
+            IFUB.setLabelTextAnchor(TextAnchor.HALF_ASCENT_LEFT);
+            plot.addDomainMarker(IFUB);
+            final Marker IFUR = new ValueMarker(150.0);
+            IFUR.setPaint(Color.red);
+            IFUR.setLabel("IFU-R");
+            IFUR.setLabelAnchor(RectangleAnchor.BOTTOM_LEFT);
+            IFUR.setLabelTextAnchor(TextAnchor.HALF_ASCENT_RIGHT);
+            plot.addDomainMarker(IFUR);
+
         }
 
         // add all the data
