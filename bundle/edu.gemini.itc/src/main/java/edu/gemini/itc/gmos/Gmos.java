@@ -134,8 +134,9 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
             }
         }
 
-        addComponent(_detector);  // TODO: REL-2577:  Move line to AFTER any IFU wavelength shifts.
-
+        if (!isIfu2()) {
+            addComponent(_detector);  // TODO: REL-2577:  Move line to AFTER any IFU wavelength shifts.
+        }
 
         // validate the current configuration
         validate();

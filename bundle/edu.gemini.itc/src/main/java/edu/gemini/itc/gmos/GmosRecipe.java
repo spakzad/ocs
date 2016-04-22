@@ -64,7 +64,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
     private final ObservationDetails _obsDetailParameters;
     private final ObservingConditions _obsConditionParameters;
     private final TelescopeDetails _telescope;
-
+    private GmosParameters _gmosParameters;
     /**
      * Constructs a GmosRecipe given the parameters. Useful for testing.
      */
@@ -77,9 +77,10 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         _obsDetailParameters    = p.observation();
         _obsConditionParameters = p.conditions();
         _telescope              = p.telescope();
-
+        _gmosParameters         = instr;
         // some general validations
         Validation.validate(mainInstrument, _obsDetailParameters, _sdParameters);
+
     }
 
     public ItcImagingResult serviceResult(final ImagingResult[] r) {
@@ -142,6 +143,8 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
         final int firstCcdIndex = tv.getDetectorCcdStartIndex(ccdIndex);
         final int lastCcdIndex = tv.getDetectorCcdEndIndex(ccdIndex, detectorCount);
+
+///        new DetectorQE(_gmosParameters, _obsDetailParameters, "GMOS", ccdIndex);
 
         // Start of morphology section of ITC
 
@@ -343,7 +346,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
     }
 
     /** Creates the signal in pixel space chart. */
-    private static SpcChartData createSignalPixelChart(final SpectroscopyResult[] results, final int i) {
+    private SpcChartData createSignalPixelChart(final SpectroscopyResult[] results, final int i) {
         final Gmos mainInstrument = (Gmos) results[0].instrument(); // This must be GMOS here.
         final Gmos[] ccdArray     = mainInstrument.getDetectorCcdInstruments();
         final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
@@ -472,7 +475,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
     }
 
     /** Creates all data series for the signal in pixel space chart. */
-    private static List<SpcSeriesData> signalPixelChartSeries(final SpecS2N result, final int start, final int end, final DetectorsTransmissionVisitor tv, final String ccdName) {
+    private List<SpcSeriesData> signalPixelChartSeries(final SpecS2N result, final int start, final int end, final DetectorsTransmissionVisitor tv, final String ccdName) {
         // This type of chart is currently only used for IFU-2. It transforms the signal from
         // wavelength space to pixel space and displays it as a chart including gaps between CCDs.
 
@@ -490,7 +493,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final double shiftedRedBkg[][]  = tv.toPixelSpace(redBkg.getData(start, end),  shift);
         final double shiftedBlueBkg[][] = tv.toPixelSpace(bluBkg.getData(start, end), -shift);
 
-//        DetectorQE.DetectorQEAdd();
+        DetectorQE.DetectorQEAdd();
 
         final List<SpcSeriesData> series = new ArrayList<>();
         series.add(new SpcSeriesData(SignalData.instance(),     "Red Signal"            + ccdName, shiftedRed,     new Some<>(ITCChart.DarkRed)));
@@ -520,7 +523,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final double shiftedRedFinS2N[][]  = tv.toPixelSpace(redFinalS2N.getData(start, end),  shift);
         final double shiftedBlueFinS2N[][] = tv.toPixelSpace(bluFinalS2N.getData(start, end), -shift);
 
-//        DetectorQE.DetectorQEAdd();
+        DetectorQE.DetectorQEAdd();
 
         final List<SpcSeriesData> series = new ArrayList<>();
         series.add(new SpcSeriesData(SignalData.instance(),     "Single Exp S/N (IFU-R)" + ccdName, shiftedRedExpS2N,  new Some<>(ITCChart.DarkRed)));
