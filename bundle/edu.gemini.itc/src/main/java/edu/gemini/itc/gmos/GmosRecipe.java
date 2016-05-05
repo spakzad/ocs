@@ -475,7 +475,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
     }
 
     /** Creates all data series for the signal in pixel space chart. */
-    private List<SpcSeriesData> signalPixelChartSeries(final SpecS2N result, final int start, final int end, final DetectorsTransmissionVisitor tv, final String ccdName) {
+    private static List<SpcSeriesData> signalPixelChartSeries(final SpecS2N result, final int start, final int end, final DetectorsTransmissionVisitor tv, final String ccdName) {
         // This type of chart is currently only used for IFU-2. It transforms the signal from
         // wavelength space to pixel space and displays it as a chart including gaps between CCDs.
 
@@ -493,7 +493,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final double shiftedRedBkg[][]  = tv.toPixelSpace(redBkg.getData(start, end),  shift);
         final double shiftedBlueBkg[][] = tv.toPixelSpace(bluBkg.getData(start, end), -shift);
 
-        DetectorQE.DetectorQEAdd();
+        // DetectorQE.DetectorQEAdd();
 
         final List<SpcSeriesData> series = new ArrayList<>();
         series.add(new SpcSeriesData(SignalData.instance(),     "Red Signal"            + ccdName, shiftedRed,     new Some<>(ITCChart.DarkRed)));
@@ -505,7 +505,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
     }
 
     /** Creates all data series for the signal to noise in pixel space chart. */
-    private List<SpcSeriesData> s2nPixelChartSeries(final SpecS2N result, final int start, final int end, final DetectorsTransmissionVisitor tv, final String ccdName) {
+    private static List<SpcSeriesData> s2nPixelChartSeries(final SpecS2N result, final int start, final int end, final DetectorsTransmissionVisitor tv, final String ccdName) {
         // This type of chart is currently only used for IFU-2. It transforms the signal from
         // wavelength space to pixel space and displays it as a chart including gaps between CCDs.
 
@@ -523,7 +523,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final double shiftedRedFinS2N[][]  = tv.toPixelSpace(redFinalS2N.getData(start, end),  shift);
         final double shiftedBlueFinS2N[][] = tv.toPixelSpace(bluFinalS2N.getData(start, end), -shift);
 
-        DetectorQE.DetectorQEAdd();
+        // DetectorQE.DetectorQEAdd();
 
         final List<SpcSeriesData> series = new ArrayList<>();
         series.add(new SpcSeriesData(SignalData.instance(),     "Single Exp S/N (IFU-R)" + ccdName, shiftedRedExpS2N,  new Some<>(ITCChart.DarkRed)));
