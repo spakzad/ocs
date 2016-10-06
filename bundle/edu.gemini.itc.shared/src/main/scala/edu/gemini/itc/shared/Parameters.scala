@@ -83,6 +83,7 @@ sealed trait IfuMethod extends AnalysisMethod {
 final case class IfuSingle(skyFibres: Int, offset: Double) extends IfuMethod
 final case class IfuRadial(skyFibres: Int, minOffset: Double, maxOffset: Double) extends IfuMethod
 final case class IfuSummed(skyFibres: Int, numX: Int, numY: Int, centerX: Double, centerY: Double) extends IfuMethod
+final case class IfuSum(skyFibres: Int, num: Double, dumb: Boolean) extends IfuMethod
 
 
 // === Observation Details

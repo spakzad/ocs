@@ -111,6 +111,10 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
             } else if (getIfuMethod().get() instanceof IfuRadial) {
                 final IfuRadial ifu = (IfuRadial) getIfuMethod().get();
                 _IFU = new IFUComponent(getPrefix(), ifu.minOffset(), ifu.maxOffset());
+            } else if (getIfuMethod().get() instanceof IfuSum) {
+                double num =  ((IfuSum) odp.analysisMethod()).num();
+                Boolean dumb = true;
+                _IFU = new IFUComponent(getPrefix(), ((IfuSum) odp.analysisMethod()).num(), dumb);
             } else {
                 throw new Error("invalid IFU type");
             }

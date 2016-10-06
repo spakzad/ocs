@@ -30,6 +30,7 @@ import edu.gemini.itc.shared.ChartAxisRange;
 import edu.gemini.itc.shared.FinalS2NData;
 import edu.gemini.itc.shared.GmosParameters;
 import edu.gemini.itc.shared.ITCChart;
+import edu.gemini.itc.shared.IfuSum;
 import edu.gemini.itc.shared.ItcImagingResult;
 import edu.gemini.itc.shared.ItcParameters;
 import edu.gemini.itc.shared.ItcSpectroscopyResult;
@@ -177,12 +178,33 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
             // for uniform sources the result is the same regardless of the IFU offsets/position
             // in this case we only calcualte and display the result of the first IFU element
-            final int ifusToShow = _sdParameters.isUniform() ? 1 : sf_list.size();
+            // For the summed IFU we will also only have a single S/N value.
+            //final int ifusToShow = (_sdParameters.isUniform()) ? 1 : sf_list.size();
+            int ifusToShow = (_sdParameters.isUniform()) ? 1 : sf_list.size();
+            if (_obsDetailParameters.analysisMethod() instanceof IfuSum) {
+                ifusToShow = 1;
+            } else {
+                ifusToShow = sf_list.size();
+            }
             specS2N = new SpecS2NSlitVisitor[ifusToShow];
 
             // process all IFU elements
+            double totalspsf = 0;
+            if (_obsDetailParameters.analysisMethod() instanceof IfuSum) {
+                for (int i=0; i < sf_list.size(); i++) {
+                    final double spsf = sf_list.get(i);
+                    totalspsf += spsf;
+                }
+            }
             for (int i = 0; i < ifusToShow; i++) {
-                final double spsf = sf_list.get(i);
+                //double spsf = sf_list.get(i);
+                double spsf = 0;
+                if (_obsDetailParameters.analysisMethod() instanceof IfuSum) {
+                    spsf = totalspsf;
+                } else {
+                    spsf = sf_list.get(i);
+                }
+
                 final Slit ifuSlit = Slit$.MODULE$.apply(instrument.getSlitWidth(), slitLength, instrument.getPixelSize());
                 specS2N[i] = new SpecS2NSlitVisitor(
                         ifuSlit,
@@ -285,7 +307,11 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
 
         final boolean ifuUsed   = mainInstrument.isIfuUsed();
-        final double  ifuOffset = ifuUsed ? mainInstrument.getIFU().getApertureOffsetList().get(i) : 0.0;
+        // final double  ifuOffset = ifuUsed ? mainInstrument.getIFU().getApertureOffsetList().get(i) : 0.0;
+        double  ifuOffset = ifuUsed ? mainInstrument.getIFU().getApertureOffsetList().get(i) : 0.0;
+        if (mainInstrument.getIfuMethod().get() instanceof IfuSum) {
+            ifuOffset = 0.0;
+        }
 
         final List<ChartAxis> axes = new ArrayList<>();
         final String title    =

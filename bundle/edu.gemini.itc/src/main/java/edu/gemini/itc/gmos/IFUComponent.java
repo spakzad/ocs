@@ -49,6 +49,44 @@ public final class IFUComponent extends TransmissionElement {
         IFUOffsets.add(IFUOffsetX);
     }
 
+    /**
+     * Constructor for a user-defined centered circular aperture set.
+     *
+     * @param  radius       Radius of summation
+     * @throws java.lang.Exception Thrown if IFU cannot be created
+     */
+
+    public IFUComponent(final String prefix, final double radius, final Boolean dumb) {
+
+        super(ITCConstants.LIB + "/" + Gmos.INSTR_DIR + "/" + prefix + "ifu_trans" + Instrument.DATA_SUFFIX);
+
+        // make sure there is at least one IFU element in the final result
+///        IFURadialSum = (IFURadialSum < 1) ? 1 : IFURadialSum;
+///        System.out.println(IFURadialSum);
+
+        IFUApertures = new ApertureComposite();
+        IFUOffsets = new ArrayList<>();
+
+        int numX = 19;            // number of elements in the IFU in the x-direction
+        int numY = 25;            // number of elements in the IFU in the y-direction
+        for (int i = 0; i < numY; i++) {
+            double y = (i - numY/2.) * IFU_DIAMETER;
+            for (int j = 0; j < numX; j++) {
+                double x = (j - numX/2) * IFU_DIAMETER;
+                //double IFUOffsetX = numX / 2. - x;
+                //double IFUOffsetY = numY / 2. - y;
+                double r = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+                if (r < radius) {
+                    IFUApertures.addAperture(new HexagonalAperture(x, y, IFU_DIAMETER));
+                    IFUOffsets.add(x);
+                    IFUOffsets.add(y);
+                }
+            }
+        }
+///        IFUApertures.addAperture(new HexagonalAperture(IFUOffsetX, 0, IFURadialSum));
+///        IFUOffsets.add(0.0);
+
+    }
 
     public ApertureComponent getAperture() {
         return IFUApertures;
