@@ -2,16 +2,24 @@ package edu.gemini.spModel.gemini.gnirs;
 
 import edu.gemini.spModel.config2.ItemKey;
 import edu.gemini.spModel.data.SuggestibleString;
-import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
-import edu.gemini.spModel.type.*;
+import edu.gemini.spModel.type.DisplayableSpType;
+import edu.gemini.spModel.type.LoggableSpType;
+import edu.gemini.spModel.type.ObsoletableSpType;
+import edu.gemini.spModel.type.SequenceableSpType;
+import edu.gemini.spModel.type.SpTypeUtil;
 
 import java.beans.PropertyEditorManager;
 import java.beans.PropertyEditorSupport;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Pattern;
 
-/**
- * This class provides data types for the GNIRS components.
+import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
+
+
+/** This class provides data types for the GNIRS components.
  */
 public class GNIRSParams {
 
@@ -637,6 +645,7 @@ public class GNIRSParams {
         FAINT("Faint Objects", 16, 9., 10, "faint"),
         VERY_FAINT("Very Faint Objects", 32, 18., 7, "veryFaint"),
         VERY_BRIGHT("Very Bright/Acq./High Bckgrd.",  1, 0.2, 155, "veryBright"),
+        AUTO("Auto", 0, 0, 0, "auto")
         ;
         /**
          * The default ReadMode value
@@ -705,6 +714,8 @@ public class GNIRSParams {
                 return VERY_BRIGHT;
             } else if (name.equals("Acquisition")) { //not in the model anymore
                 return VERY_BRIGHT;
+            } else if (name.equals("Auto")) {
+                return AUTO;
             }
 
             return SpTypeUtil.oldValueOf(ReadMode.class, name, nvalue);
@@ -1018,7 +1029,8 @@ public class GNIRSParams {
     public enum WellDepth implements DisplayableSpType, SequenceableSpType {
 
         SHALLOW("Shallow", 300),
-        DEEP("Deep", 600);
+        DEEP("Deep", 600),
+        AUTO("Auto", 0);
 
         public static final WellDepth DEFAULT = SHALLOW;
 

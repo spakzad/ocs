@@ -51,8 +51,9 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
 
     protected final TransmissionElement _camera;
     protected final boolean _XDisp;
-    protected final double _wellDepth;
-    protected final double _linearityLimit;
+    protected double _wellDepth;
+    protected String _readMode;
+    protected double _linearityLimit;
 
     public Gnirs(GnirsParameters gp, ObservationDetails odp) {
         super(Site.GN, Bands.NEAR_IR, INSTR_DIR, FILENAME);
@@ -138,8 +139,19 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
         }
 
 
-        if (gp.wellDepth().isEmpty()) {
-            //set read noise by exporsure time for the web-ITC
+        if (gp.readMode().name().equals("AUTO")) {
+            if (odp.exposureTime() <= 1.0) {
+                _readMode = "VERY_BRIGHT";
+            } else if (odp.exposureTime() <= 20) {
+                _readMode = "BRIGHT";
+            } else if (odp.exposureTime() <= 60) {
+                _readMode = "FAINT";
+            } else {
+                _readMode = "VERY_FAINT";
+            }
+        }
+
+        if (gp.wellDepth().name().equals("AUTO")) {
             if (odp.exposureTime() <= 1.0) {
                 _wellDepth = DEEP_WELL;
                 _linearityLimit = DEEP_WELL_LINEARTY_LIMIT;
@@ -147,7 +159,7 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
                 _wellDepth = SHALLOW_WELL;
                 _linearityLimit = SHALLOW_WELL_LINEARITY_LIMIT;
             }
-        } else if (gp.wellDepth().get().equals(GNIRSParams.WellDepth.DEEP)) {
+        } else if (gp.wellDepth().equals(GNIRSParams.WellDepth.DEEP)) {
             _wellDepth = DEEP_WELL;
             _linearityLimit = DEEP_WELL_LINEARTY_LIMIT;
         } else {

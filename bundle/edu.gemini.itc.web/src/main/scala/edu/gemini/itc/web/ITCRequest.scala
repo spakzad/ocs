@@ -22,6 +22,7 @@ import edu.gemini.spModel.gemini.niri.Niri
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.trecs.TReCSParams
 import edu.gemini.spModel.guide.GuideProbe
+import edu.gemini.spModel.target._
 import edu.gemini.spModel.telescope.IssPort
 import squants.motion.KilometersPerSecond
 import squants.motion.VelocityConversions._
@@ -29,15 +30,15 @@ import squants.radio.IrradianceConversions._
 import squants.radio.SpectralIrradianceConversions._
 
 /**
- * ITC requests define a generic mechanism to look up values by their parameter names.
- * The different values are either enums, ints or doubles. For enums the simple name of the class is used
- * as the parameter name. This convention allows for a mostly mechanical translation of typed values from
- * a request with string based parameters, i.e. parameters in HttpServletRequests for example.
- *
- * Note: Error handling / validation is done using exceptions (for now). All exceptions are caught in {{{ITCServlet}}}
- * and the exception message is displayed to the user on the result page. This is a bit arcane but is in sync with
- * how currently validation and error handling is done throughout the code.
- */
+  * ITC requests define a generic mechanism to look up values by their parameter names.
+  * The different values are either enums, ints or doubles. For enums the simple name of the class is used
+  * as the parameter name. This convention allows for a mostly mechanical translation of typed values from
+  * a request with string based parameters, i.e. parameters in HttpServletRequests for example.
+  *
+  * Note: Error handling / validation is done using exceptions (for now). All exceptions are caught in {{{ITCServlet}}}
+  * and the exception message is displayed to the user on the result page. This is a bit arcane but is in sync with
+  * how currently validation and error handling is done throughout the code.
+  */
 sealed abstract class ITCRequest {
 
   /** Gets the value of the parameter with this name. */
@@ -54,19 +55,16 @@ sealed abstract class ITCRequest {
     case ""   => 0
     case i    =>
       try i.toInt catch {
-        case _: NumberFormatException => throw new IllegalArgumentException(s"$i is not a valid integer number value for parameter $name")
+        case e: NumberFormatException => throw new IllegalArgumentException(s"$i is not a valid integer number value for parameter $name")
       }
   }
-
-  /** Gets the named value as a boolean, it accepts several types of strings as true/false. */
-  def booleanParameter(name: String): Boolean = java.lang.Boolean.parseBoolean(parameter(name).trim())
 
   /** Gets the named value as a double. */
   def doubleParameter(name: String): Double = parameter(name).trim() match {
     case ""   => 0.0
     case d    =>
       try d.toDouble catch {
-        case _: NumberFormatException => throw new IllegalArgumentException(s"$d is not a valid double number value for parameter $name")
+        case e: NumberFormatException => throw new IllegalArgumentException(s"$d is not a valid double number value for parameter $name")
       }
   }
 
@@ -83,8 +81,8 @@ sealed abstract class ITCRequest {
 }
 
 /**
- * Utility object that allows to translate different objects into ITC requests.
- */
+  * Utility object that allows to translate different objects into ITC requests.
+  */
 object ITCRequest {
 
   def from(request: HttpServletRequest): ITCRequest = new ITCRequest {
@@ -146,24 +144,24 @@ object ITCRequest {
   }
 
   def gmosParameters(r: ITCRequest): GmosParameters = {
-    val site                              = r.enumParameter(classOf[Site])
-    val filter: GmosCommonType.Filter     = if (site.equals(Site.GN)) r.enumParameter(classOf[FilterNorth],    "instrumentFilter")    else r.enumParameter(classOf[FilterSouth],    "instrumentFilter")
-    val grating: GmosCommonType.Disperser = if (site.equals(Site.GN)) r.enumParameter(classOf[DisperserNorth], "instrumentDisperser") else r.enumParameter(classOf[DisperserSouth], "instrumentDisperser")
-    val spatBinning                       = r.intParameter("spatBinning")
-    val specBinning                       = r.intParameter("specBinning")
-    val ccdType                           = r.enumParameter(classOf[DetectorManufacturer])
-    val centralWl                         = r.centralWavelengthInNanometers()
-    val fpMask: GmosCommonType.FPUnit     = if (site.equals(Site.GN)) r.enumParameter(classOf[FPUnitNorth],    "instrumentFPMask")   else r.enumParameter(classOf[FPUnitSouth],      "instrumentFPMask")
-    val ampGain                           = r.enumParameter(classOf[AmpGain])
-    val ampReadMode                       = r.enumParameter(classOf[AmpReadMode])
+    val site        = r.enumParameter(classOf[Site])
+    val filter      = if (site.equals(Site.GN)) r.enumParameter(classOf[FilterNorth],    "instrumentFilter")    else r.enumParameter(classOf[FilterSouth],    "instrumentFilter")
+    val grating     = if (site.equals(Site.GN)) r.enumParameter(classOf[DisperserNorth], "instrumentDisperser") else r.enumParameter(classOf[DisperserSouth], "instrumentDisperser")
+    val spatBinning = r.intParameter("spatBinning")
+    val specBinning = r.intParameter("specBinning")
+    val ccdType     = r.enumParameter(classOf[DetectorManufacturer])
+    val centralWl   = r.centralWavelengthInNanometers()
+    val fpMask      = if (site.equals(Site.GN)) r.enumParameter(classOf[FPUnitNorth],    "instrumentFPMask")   else r.enumParameter(classOf[FPUnitSouth],      "instrumentFPMask")
+    val ampGain     = r.enumParameter(classOf[AmpGain])
+    val ampReadMode = r.enumParameter(classOf[AmpReadMode])
     GmosParameters(filter, grating, centralWl, fpMask, ampGain, ampReadMode, None, spatBinning, specBinning, ccdType, site)
   }
 
   /**
-  * "null" values for grating in imaging mode and Filter in spectroscopy mode are introduced in order to
-  * avoid "NONE" values for Disperser and Filter in GNIRSParams.java (since "NONE" wouldn't reflect
-  * real instrument configuration)
-  */
+    * "null" values for grating in imaging mode and Filter in spectroscopy mode are introduced in order to
+    * avoid "NONE" values for Disperser and Filter in GNIRSParams.java (since "NONE" wouldn't reflect
+    * real instrument configuration)
+    */
   def gnirsParameters(r: ITCRequest): GnirsParameters = {
     val grating     = r.parameter("Disperser") match {
       case "imaging" => None
@@ -176,7 +174,7 @@ object ITCRequest {
     val readMode    = r.enumParameter(classOf[GNIRSParams.ReadMode])
     val centralWl   = r.centralWavelengthInMicrons()
     val fpMask      = r.enumParameter(classOf[GNIRSParams.SlitWidth])
-    val wellDepth   = None                            // this is because in the web-ITC these two components
+    val wellDepth   = r.enumParameter(classOf[GNIRSParams.WellDepth])
     val camera      = None                            //    are selected automatically and not controlled by user
     val altair      = altairParameters(r)
     GnirsParameters(pixelScale, filter, grating, readMode, xDisp, centralWl, fpMask, camera, wellDepth, altair)
@@ -216,7 +214,7 @@ object ITCRequest {
     val centralWl   = r.centralWavelengthInMicrons()
     val altair      = altairParameters(r)
     NifsParameters(filter, grating, readNoise, centralWl, altair)
-   }
+  }
 
   def trecsParameters(r: ITCRequest): TRecsParameters = {
     val filter      = r.enumParameter(classOf[TReCSParams.Filter])
@@ -242,8 +240,8 @@ object ITCRequest {
         val guideStarMagnitude  = r.doubleParameter("guideMag")
         val fieldLens           = r.enumParameter(classOf[AltairParams.FieldLens])
         val wfsMode             = r.enumParameter(classOf[AltairParams.GuideStarType])
-        val altair              = AltairParameters(guideStarSeparation, guideStarMagnitude, fieldLens, wfsMode)
-        Some(altair)
+        val altair              = new AltairParameters(guideStarSeparation, guideStarMagnitude, fieldLens, wfsMode)
+        new Some(altair)
 
       case _ =>
         None
@@ -253,7 +251,7 @@ object ITCRequest {
   def gemsParameters(r: ITCRequest): GemsParameters = {
     val avgStrehl  = r.doubleParameter("avgStrehl") / 100.0
     val strehlBand = r.parameter("strehlBand")
-    GemsParameters(avgStrehl, strehlBand)
+    new GemsParameters(avgStrehl, strehlBand)
   }
 
   def observationParameters(r: ITCRequest, i: InstrumentDetails): ObservationDetails = {
@@ -280,7 +278,7 @@ object ITCRequest {
       case _ => throw new IllegalArgumentException("Total integration time to achieve a specific \nS/N ratio is not supported in spectroscopy mode.  \nPlease select the Total S/N method.")
     }
 
-    ObservationDetails(calculationMethod, analysisMethod(r))
+    new ObservationDetails(calculationMethod, analysisMethod(r))
 
   }
 
@@ -359,7 +357,7 @@ object ITCRequest {
     }
 
     // WOW, finally we've got everything in place..
-    SourceDefinition(spatialProfile, sourceDefinition, norm, units, normBand, redshift)
+    new SourceDefinition(spatialProfile, sourceDefinition, norm, units, normBand, redshift)
   }
 
   def analysisMethod(r: ITCRequest): AnalysisMethod = r.parameter("analysisMethod") match {
@@ -368,7 +366,7 @@ object ITCRequest {
     case "singleIFU"  => IfuSingle(r.intParameter("ifuSkyFibres"), r.doubleParameter("ifuOffset"))
     case "radialIFU"  => IfuRadial(r.intParameter("ifuSkyFibres"), r.doubleParameter("ifuMinOffset"), r.doubleParameter("ifuMaxOffset"))
     case "summedIFU"  => IfuSummed(r.intParameter("ifuSkyFibres"), r.intParameter("ifuNumX"), r.intParameter("ifuNumY"), r.doubleParameter("ifuCenterX"), r.doubleParameter("ifuCenterY"))
-    case "sumIFU"     => IfuSum(r.intParameter("ifuSkyFibres"), r.doubleParameter("ifuNum"), r.booleanParameter("IFU_1"));
+    case "sumIFU"  => IfuSum(r.intParameter("ifuSkyFibres"), r.doubleParameter("ifuNum"), true);
     case _            => throw new NoSuchElementException(s"Unknown analysis method ${r.parameter("analysisMethod")}")
   }
 
